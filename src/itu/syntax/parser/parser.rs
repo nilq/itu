@@ -185,7 +185,7 @@ impl Parser {
                 }
 
                 if current_indent > 0 {
-                    if indents.get(current_indent - 1).unwrap() < indents.get(0).unwrap() {
+                    if indents[current_indent - 1] < indents[0] {
                         stack.pop();
                         self.traveler.prev();
 
@@ -338,7 +338,7 @@ impl Parser {
                 "(" => {
                     self.traveler.next();
                     if self.traveler.current_content() == ")" {
-                        return Err(ParserError::new_pos(self.traveler.current().position, &format!("empty clause '()'")))
+                        return Err(ParserError::new_pos(self.traveler.current().position, "empty clause '()'"))
                     }
 
                     let a = self.expression()?;

@@ -73,8 +73,4 @@ impl PartialEq for Token {
     fn eq(&self, other: &Token) -> bool {
         self.token_type == other.token_type
     }
-
-    fn ne(&self, other: &Token) -> bool {
-        self.token_type != other.token_type
-    }
 }

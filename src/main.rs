@@ -5,7 +5,7 @@ fn main() {
     let test = r#"
 a := 123
 b: str = r"hey"
-c: char
+c: char = 3 -2+1
     "#;
 
     let lexer = lexer(&mut test.chars());

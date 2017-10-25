@@ -61,7 +61,7 @@ impl Traveler {
     }
 
     pub fn expect_content(&self, content: &str) -> ParserResult<String> {
-        if &self.current_content() == content {
+        if self.current_content() == content {
             Ok(self.current_content())
         } else {
             Err(ParserError::new_pos(self.current().position, &format!("expected '{}', found '{}'", content, self.current_content())))
@@ -69,22 +69,18 @@ impl Traveler {
     }
 
     pub fn expect_contents(&self, sequence: Vec<String>) -> Result<Vec<&Token>, String> {
-        let mut accum: usize = 0;
-
         let mut res = Vec::new();
 
-        for c in sequence {
+        for (accum, c) in sequence.iter().enumerate() {
             if self.top + accum >= self.tokens.len() {
                 return Err(format!("expected '{}', found end of source >:(", c))
             }
 
-            if &c != self.tokens[self.top + accum].content() {
+            if c != self.tokens[self.top + accum].content() {
                 return Err(format!("expected '{}', found '{}'", c, self.tokens[self.top + accum].content()))
             }
 
             res.push(self.get(self.top + accum));
-
-            accum += 1
         }
 
         Ok(res)
