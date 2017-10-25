@@ -7,7 +7,7 @@ a := 123
 b: str = r"hey"
 c: char
     "#;
-    
+
     let lexer = lexer(&mut test.chars());
 
     let traveler   = Traveler::new(lexer.collect());
