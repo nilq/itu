@@ -122,9 +122,7 @@ impl Type {
             self == other
         }
     }
-}
 
-impl Type {
     pub fn from_str(v: &str) -> Option<Type> {
         match v {
             "i08"  => Some(Type::I08),
