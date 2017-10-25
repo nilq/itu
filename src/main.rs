@@ -4,13 +4,17 @@ use itu::*;
 fn main() {
     let test = r#"
 a := 123
-b: str  = r"hey"
-c: char = 'a'
+b: str = r"hey"
+c: char
     "#;
     
     let lexer = lexer(&mut test.chars());
-    
-    for token in lexer {
-        println!("{:#?}", token)
+
+    let traveler   = Traveler::new(lexer.collect());
+    let mut parser = Parser::new(traveler);
+
+    match parser.parse() {
+        Err(why)  => println!("error: {}", why),
+        Ok(stuff) => println!("{:#?}", stuff),
     }
 }
