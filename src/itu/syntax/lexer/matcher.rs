@@ -158,10 +158,7 @@ impl Matcher for StringLiteralMatcher {
         tokenizer.advance(1);
         let mut string       = String::new();
         let mut found_escape = false;
-        loop {
-            if tokenizer.end() {
-                break
-            }
+        while !tokenizer.end() {
             if raw_marker {
                 if tokenizer.peek().unwrap() == &'"' {
                     break
@@ -265,7 +262,7 @@ impl Matcher for KeyMatcher {
                             return None
                         }
                     },
-                    
+
                     None => (),
                 }
 
