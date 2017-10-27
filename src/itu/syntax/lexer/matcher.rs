@@ -104,7 +104,7 @@ impl Matcher for FloatLiteralMatcher {
             }
         }
 
-        if accum == "0.".to_owned() {
+        if accum == "0." {
             None
         } else if accum.contains('.') {
 
@@ -144,10 +144,10 @@ pub struct StringLiteralMatcher {}
 impl Matcher for StringLiteralMatcher {
     fn try_match(&self, tokenizer: &mut Tokenizer) -> Option<Token> {
         let mut raw_marker = false;
-        let delimeter  = match tokenizer.peek().unwrap() {
-            &'"'  => Some('"'),
-            &'\'' => Some('\''),
-            &'r' if tokenizer.peek_n(1) == Some(&'"') => {
+        let delimeter  = match *tokenizer.peek().unwrap() {
+            '"'  => Some('"'),
+            '\'' => Some('\''),
+            'r' if tokenizer.peek_n(1) == Some(&'"') => {
                 raw_marker = true;
                 tokenizer.advance(1);
 
@@ -164,27 +164,25 @@ impl Matcher for StringLiteralMatcher {
                     break
                 }
                 string.push(tokenizer.next().unwrap())
-            } else {
-                if found_escape {
-                    string.push(
-                        match tokenizer.next().unwrap() {
-                            c @ '\\' | c @ '\'' | c @ '"' => c,
-                            'n' => '\n',
-                            'r' => '\r',
-                            't' => '\t',
-                            s => panic!("invalid character escape: {}", s),
-                        }
-                    );
-                    found_escape = false
-                } else {
-                    match tokenizer.peek().unwrap() {
-                        &'\\' => {
-                            tokenizer.next();
-                            found_escape = true
-                        },
-                        &c if &c == &delimeter.unwrap() => break,
-                        _ => string.push(tokenizer.next().unwrap()),
+            } else if found_escape {
+                string.push(
+                    match tokenizer.next().unwrap() {
+                        c @ '\\' | c @ '\'' | c @ '"' => c,
+                        'n' => '\n',
+                        'r' => '\r',
+                        't' => '\t',
+                        s => panic!("invalid character escape: {}", s),
                     }
+                );
+                found_escape = false
+            } else {
+                match *tokenizer.peek().unwrap() {
+                    '\\' => {
+                        tokenizer.next();
+                        found_escape = true
+                    },
+                    c if c == delimeter.unwrap() => break,
+                    _ => string.push(tokenizer.next().unwrap()),
                 }
             }
         }
@@ -256,14 +254,10 @@ impl Matcher for KeyMatcher {
                 return None
             }
             if dat.collect::<String>() == constant {
-                match tokenizer.peek_n(constant.len()) {
-                    Some(c) => {
-                        if "_@?".contains(*c) || c.is_alphanumeric() {
-                            return None
-                        }
-                    },
-
-                    None => (),
+                if let Some(c) = tokenizer.peek_n(constant.len()) {
+                    if "_@?".contains(*c) || c.is_alphanumeric() {
+                        return None
+                    }
                 }
 
                 tokenizer.advance(constant.len());
