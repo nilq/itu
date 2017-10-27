@@ -23,7 +23,7 @@ impl Parser {
 
         Ok(stack)
     }
-    
+
     pub fn skip_whitespace(&mut self) -> ParserResult<()> {
         while self.traveler.current_content() == "\n" ||
               self.traveler.current().token_type == TokenType::EOL ||
@@ -134,22 +134,18 @@ impl Parser {
             if self.traveler.current_content() == "," {
                 self.traveler.next();
             }
-            match self.traveler.current().token_type {
-                TokenType::Type => {
-                    let t = self.try_type()?;
 
+            match self.traveler.current().token_type {
+                TokenType::Identifier => {
+                    let a = Rc::new(self.traveler.current_content());
+                    self.traveler.next();
+                    
                     self.traveler.expect_content(":")?;
                     self.traveler.next();
                     
-                    let id = self.traveler.expect(TokenType::Identifier)?;
-                    self.traveler.next();
+                    let t = self.try_type()?;
                     
-                    params.push((Some(t), Rc::new(id)))
-                },
-                
-                TokenType::Identifier => {
-                    params.push((None, Rc::new(self.traveler.current_content())));
-                    self.traveler.next();
+                    params.push((Some(t), a));
                 },
                 
                 _ => return Err(ParserError::new_pos(self.traveler.current().position, &format!("expected parameter: {}", self.traveler.current_content()))),
@@ -163,59 +159,34 @@ impl Parser {
     
     fn block(&mut self) -> ParserResult<Expression> {
         let mut stack = Vec::new();
-        
-        let mut indents        = Vec::new();
-        let mut current_indent = 0;
-
-        'a: loop {
-            while self.traveler.current_content() != "\n" {
-                if self.traveler.current().token_type == TokenType::Indent {
-                    let mut acc = 0;
-                        
-                    while self.traveler.current().token_type == TokenType::Indent {
-                        self.traveler.next();
-                        acc += 1;
-                    }
-
-                    stack.push(self.traveler.current().clone());
+        loop {
+            if self.traveler.current().token_type == TokenType::Indent {
+                self.traveler.next();
+                if self.traveler.current_content() == "\n" {
                     self.traveler.next();
-
-                    indents.push(acc);
-                    current_indent += 1;
+                    break
                 }
-                
-                if current_indent > 0 {
-                    if indents.get(current_indent - 1).unwrap() < indents.get(0).unwrap() {
-                        stack.pop();
-                        self.traveler.prev();
+            } else if self.traveler.current_content() == "\n" {
+                stack.push(self.traveler.current().clone());
+                self.traveler.next();
 
-                        break 'a
-                    } else {
-                        stack.push(self.traveler.current().clone());
-                        self.traveler.next();
-                    }
+                if self.traveler.current().token_type == TokenType::Indent {
+                    self.traveler.next();
                 } else {
-                    stack.pop();
-                    self.traveler.prev();
-
-                    break 'a
-                }
-
-                if self.traveler.remaining() <= 1 || self.traveler.current().token_type == TokenType::EOF {
                     break
                 }
             }
 
-            stack.push(self.traveler.current().clone());
-            self.traveler.next();
-        
-            if self.traveler.remaining() <= 1 {
+            if self.traveler.remaining() < 2 {
                 break
             }
-        }
+
+            stack.push(self.traveler.current().clone());
+            self.traveler.next();
+        }        
 
         let mut parser = Parser::new(Traveler::new(stack));
-        
+
         match parser.parse() {
             Ok(s)    => Ok(Expression::Block(s)),
             Err(why) => Err(ParserError::new(&format!("{}", why))),
@@ -333,26 +304,66 @@ impl Parser {
                     Ok(a)
                 }
             },
-            
+
             TokenType::Symbol => match self.traveler.current_content().as_str() {
                 "(" => {
                     self.traveler.next();
                     if self.traveler.current_content() == ")" {
                         return Err(ParserError::new_pos(self.traveler.current().position, &format!("empty clause '()'")))
                     }
-                    
-                    let a = self.expression()?;
 
-                    self.skip_whitespace()?;
-                    self.traveler.expect_content(")")?;
-                    self.traveler.next();
+                    let mut acc = 1;
+                    let mut inside = 1;
 
-                    if self.traveler.current_content() == "[" {
-                        self.index(Rc::new(a))
-                    } else if self.traveler.remaining() > 1 {
-                        self.try_call(a)
+                    while inside != 0 {
+                        match self.traveler.current_content().as_str() {
+                            "(" => inside += 1,
+                            ")" => inside -= 1,
+                            _   => (),
+                        }
+                        self.traveler.next();
+                        acc += 1
+                    }
+
+                    if self.traveler.current_content() == ":" {
+                        for _ in 0 .. acc {
+                            self.traveler.prev();
+                        }
+                        
+                        let params = self.params()?;
+                        
+                        self.traveler.expect_content(":")?;
+                        self.traveler.next();
+                        
+                        let t = Rc::new(self.try_type()?);
+                        
+                        self.traveler.expect_content("->")?;
+                        self.traveler.next();
+                        
+                        let body = Rc::new(self.body()?);
+    
+                        Ok(Expression::Lambda(Lambda {t, params, body}))
+                        
                     } else {
-                        Ok(a)
+                        for _ in 0 .. acc {
+                            self.traveler.prev();
+                        }
+                        
+                        self.traveler.next();
+                        
+                        let a = self.expression()?;
+
+                        self.skip_whitespace()?;
+                        self.traveler.expect_content(")")?;
+                        self.traveler.next();
+
+                        if self.traveler.current_content() == "[" {
+                            self.index(Rc::new(a))
+                        } else if self.traveler.remaining() > 1 {
+                            self.try_call(a)
+                        } else {
+                            Ok(a)
+                        }
                     }
                 }
                 "{" => self.array(),

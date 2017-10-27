@@ -3,9 +3,10 @@ use itu::*;
 
 fn main() {
     let test = r#"
-a := 123
-b: str = r"hey"
-c: char
+(a: i32): i128 ->
+    (
+        (a: i32): i128 -> a + 10
+    )
     "#;
     
     let lexer = lexer(&mut test.chars());

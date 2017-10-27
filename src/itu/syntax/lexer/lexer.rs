@@ -67,6 +67,7 @@ pub fn lexer(data: &mut Chars) -> Lexer {
     ].iter().map(|&x| x.to_string()).collect();
 
     let keywords = vec![
+        "->",
         "if",
         "then",
         "elif",
@@ -94,6 +95,7 @@ pub fn lexer(data: &mut Chars) -> Lexer {
     lexer.matchers_mut().push(Rc::new(matcher_eol));
     lexer.matchers_mut().push(Rc::new(matcher_indent));
     lexer.matchers_mut().push(Rc::new(matcher_whitespace));
+    lexer.matchers_mut().push(Rc::new(matcher_keywords));
     lexer.matchers_mut().push(Rc::new(matcher_operator));
     lexer.matchers_mut().push(Rc::new(matcher_symbol));
     lexer.matchers_mut().push(Rc::new(matcher_float_literal));
@@ -101,7 +103,6 @@ pub fn lexer(data: &mut Chars) -> Lexer {
     lexer.matchers_mut().push(Rc::new(matcher_string_literal));
     lexer.matchers_mut().push(Rc::new(matcher_boolean));
     lexer.matchers_mut().push(Rc::new(matcher_types));
-    lexer.matchers_mut().push(Rc::new(matcher_keywords));
     lexer.matchers_mut().push(Rc::new(matcher_identifier));
     lexer
 }
