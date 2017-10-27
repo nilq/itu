@@ -229,11 +229,16 @@ impl Parser {
         while self.traveler.current_content() != "}" {
             if self.traveler.current_content() == "," {
                 self.traveler.next();
+                self.skip_whitespace()?;
+
+                if self.traveler.current_content() == "}" {
+                    break
+                }
+
                 content.push(Rc::new(self.expression()?));
 
             } else if acc == 0 {
                 content.push(Rc::new(self.expression()?));
-
             } else {
                 self.traveler.prev();
                 if self.traveler.current_content() != "," {
