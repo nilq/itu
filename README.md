@@ -30,7 +30,7 @@ project := (fov: f64, point: [f64]): projection ->
       
   projection.new scale, point2
 
-project_to = (dimension: i32, fov: f64, point: [f64]): projection ->
+project_to := (dimension: i32, fov: f64, point: [f64]): projection ->
   projected := project fov, point
   
   if dimension - #point2 == 0
