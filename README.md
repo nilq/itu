@@ -4,7 +4,7 @@ if rust and moonscript copulated and had a super cool interpreted baby
 
 ### syntax
 
-```
+```rs
 sum := (...: i128): i128 ->
   things: [i128] = {...}
   
