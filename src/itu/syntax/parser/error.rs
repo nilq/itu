@@ -9,8 +9,8 @@ pub enum ParserErrorValue {
 
 #[derive(Debug)]
 pub struct ParserError {
-    value:    ParserErrorValue,
-    position: Option<TokenPosition>,
+    pub value:    ParserErrorValue,
+    pub position: Option<TokenPosition>,
 }
 
 #[allow(dead_code)]

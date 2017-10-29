@@ -405,6 +405,8 @@ impl Parser {
     fn definition(&mut self, name: Rc<Expression>) -> ParserResult<Statement> {
         self.traveler.expect_content(":")?;
         self.traveler.next();
+        
+        self.skip_whitespace()?;
 
         let t;
 
