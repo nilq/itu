@@ -2,18 +2,39 @@
 
 if rust and moonscript copulated and had a super cool interpreted baby
 
-### syntax
+### example
 
-```
-sum := (...: i128): i128 ->
-  things: [i128] = {...}
+untested projection thing
+
+```rust
+projection: struct = {
+  scale: f64
+  point: [f64]
+}
+
+impl projection
+  new := (scale, point): projection ->
+    projection {
+      scale, point
+    }
+
+project := (fov: f64, point: [f64]): projection ->
+  scale: f64        = fov / (fov + point[#point])
+  point2: mut [f64] = {}
   
-  acc: mut i128 = 0
-  
-  for i in things
-    acc += i
+  for value in point
+    array.push point, c * scale
     
-  acc
+    if #point2 - #point - 1 == 0
+      break
+      
+  projection.new scale, point2
+
+project_to := (dimension: i32, fov: f64, point: [f64]): projection ->
+  projected := project fov, point
   
-print sum 2^64, 2^64 - 1
+  if dimension - #point2 == 0
+    projected
+  else
+    project_to dimension, fov, projected.point
 ```
