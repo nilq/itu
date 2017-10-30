@@ -1,11 +1,14 @@
+extern crate colored;
+use colored::*;
+
 mod itu;
 use itu::*;
 
 fn main() {
     let test = r#"
-a: [i128] = {2^128-1}
+a: [i128; 1] = {2^128-(0.5 + 0.5),}
     "#;
-
+    
     let lexer = lexer(&mut test.chars());
 
     let traveler   = Traveler::new(lexer.collect());
@@ -22,7 +25,7 @@ a: [i128] = {2^128-1}
                             lines.next();
                         }
                         
-                        let source_pos = format!("ln {}, cl {}| ", pos.line, pos.col);
+                        let source_pos = format!("ln {}, cl {}| ", pos.line, pos.col).yellow();
 
                         match lines.next() {
                             Some(line) => println!("{}{}", source_pos, line),
@@ -42,7 +45,7 @@ a: [i128] = {2^128-1}
                             ParserErrorValue::Constant(ref a) => error.push_str(a),
                         }
                         
-                        println!("{}", error);
+                        println!("{}", error.red());
                         
                     },
                     

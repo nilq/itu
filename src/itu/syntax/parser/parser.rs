@@ -240,9 +240,8 @@ impl Parser {
             } else if acc == 0 {
                 content.push(Rc::new(self.expression()?));
             } else {
-                self.traveler.prev();
                 if self.traveler.current_content() != "," {
-                    self.traveler.next();
+                    self.skip_whitespace()?;
                 }
                 break
             }
