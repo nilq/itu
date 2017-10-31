@@ -140,11 +140,14 @@ impl Parser {
                     let a = Rc::new(self.traveler.current_content());
                     self.traveler.next();
                     
-                    self.traveler.expect_content(":")?;
-                    self.traveler.next();
+                    let mut t = Type::Any;
                     
-                    let t = self.try_type()?;
-                    
+                    if self.traveler.current_content() == ":" {
+                        self.traveler.next();
+                        
+                        t = self.try_type()?
+                    }
+
                     params.push((Some(t), a));
                 },
 
