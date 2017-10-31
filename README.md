@@ -7,12 +7,12 @@ if rust and moonscript copulated and had a super cool interpreted baby
 untested projection thing
 
 ```rust
-projection: struct = {
+projection := @{
   scale: f64
   point: [f64]
 }
 
-impl projection
+projection:
   new := (scale, point): projection ->
     projection {
       scale, point
@@ -24,10 +24,9 @@ project := (fov: f64, point: [f64]): projection ->
   
   for value in point
     array.push point, c * scale
-    
-    if #point2 - #point - 1 == 0
-      break
-      
+
+    if #point2 - #point - 1 == 0 then break
+
   projection.new scale, point2
 
 project_to := (dimension: i32, fov: f64, point: [f64]): projection ->

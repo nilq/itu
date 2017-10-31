@@ -348,6 +348,21 @@ impl Parser {
     
                         Ok(Expression::Lambda(Lambda {t, params, body}))
                         
+                    } else if self.traveler.current_content() == "->" {
+                        for _ in 0 .. acc {
+                            self.traveler.prev();
+                        }
+                        
+                        let params = self.params()?;
+                        
+                        let t = Rc::new(Type::Any);
+                        
+                        self.traveler.expect_content("->")?;
+                        self.traveler.next();
+                        
+                        let body = Rc::new(self.body()?);
+    
+                        Ok(Expression::Lambda(Lambda {t, params, body}))
                     } else {
                         for _ in 0 .. acc {
                             self.traveler.prev();
@@ -375,6 +390,12 @@ impl Parser {
             },
 
             TokenType::Keyword => match self.traveler.current_content().as_str() {
+                "->" => {
+                    self.traveler.next();
+                    let body = Rc::new(self.body()?);
+
+                    Ok(Expression::Lambda(Lambda {t: Rc::new(Type::Any), params: Vec::new(), body}))
+                },
                 _ => Err(ParserError::new_pos(self.traveler.current().position, &format!("unexpected keyword: {}", self.traveler.current_content()))),
             },
 
@@ -453,7 +474,7 @@ impl Parser {
                 }
             },
             TokenType::Keyword => match self.traveler.current_content().as_str() {
-                _ => Err(ParserError::new_pos(self.traveler.current().position, &format!("unexpected keyword: {}", self.traveler.current_content()))),
+                _ => Ok(Statement::Expression(Rc::new(self.expression()?))),
             },
             _ => Ok(Statement::Expression(Rc::new(self.expression()?))),
         }

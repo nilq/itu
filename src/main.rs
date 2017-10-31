@@ -6,7 +6,7 @@ use itu::*;
 
 fn main() {
     let test = r#"
-a: [i128; 1] = {2^128-(0.5 + 0.5),}
+((a: f32) -> 10 + a) 10.0
     "#;
     
     let lexer = lexer(&mut test.chars());
