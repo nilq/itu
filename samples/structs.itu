@@ -1,0 +1,16 @@
+struct vector
+  x: f32
+  y: f32
+
+impl point
+  new: (x: f32, y: f32): vector ->
+    vector @ {
+      x, y
+    }
+
+impl size for vector
+  magnitude := (self): f32 ->
+    math.sqrt self.magnitude_sqrt
+
+  magnitude_sqrt := (self): f32 ->
+    self.x^2 + self.y^2

@@ -1,5 +1,7 @@
 use std::rc::Rc;
 
+use super::*;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Block(Vec<Statement>),
@@ -95,6 +97,7 @@ impl Operand {
 pub enum Type {
     Mut(Option<Rc<Type>>),
     Array(Rc<Type>, Option<Expression>),
+    Identifier(Rc<String>),
     I08,
     I16,
     I32,
@@ -123,25 +126,30 @@ impl Type {
         }
     }
 
-    pub fn from_str(v: &str) -> Option<Type> {
-        match v {
-            "i08"  => Some(Type::I08),
-            "i32"  => Some(Type::I32),
-            "i16"  => Some(Type::I16),
-            "i64"  => Some(Type::I64),
-            "i128" => Some(Type::I128),
-            "f32"  => Some(Type::F32),
-            "f64"  => Some(Type::F64),
-            "u08"  => Some(Type::U08),
-            "u16"  => Some(Type::U16),
-            "u32"  => Some(Type::U32),
-            "u64"  => Some(Type::U64),
-            "u128" => Some(Type::U128),
-            "char" => Some(Type::Char),
-            "str"  => Some(Type::Str),
-            "bool" => Some(Type::Bool),
-            "any"  => Some(Type::Any),
-            _      => None,
+    pub fn from(v: &Token) -> Option<Type> {
+        match v.token_type {
+            TokenType::Type => match v.content().as_str() {
+                "i08"  => Some(Type::I08),
+                "i32"  => Some(Type::I32),
+                "i16"  => Some(Type::I16),
+                "i64"  => Some(Type::I64),
+                "i128" => Some(Type::I128),
+                "f32"  => Some(Type::F32),
+                "f64"  => Some(Type::F64),
+                "u08"  => Some(Type::U08),
+                "u16"  => Some(Type::U16),
+                "u32"  => Some(Type::U32),
+                "u64"  => Some(Type::U64),
+                "u128" => Some(Type::U128),
+                "char" => Some(Type::Char),
+                "str"  => Some(Type::Str),
+                "bool" => Some(Type::Bool),
+                "any"  => Some(Type::Any),
+                _      => None,
+            },
+            
+            TokenType::Identifier => Some(Type::Identifier(Rc::new(v.content().clone()))),
+            _ => None,
         }
     }
 }

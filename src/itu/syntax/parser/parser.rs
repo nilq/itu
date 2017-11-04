@@ -61,7 +61,7 @@ impl Parser {
     fn array_type(&mut self) -> ParserResult<Type> {
         self.traveler.next();
 
-        let t = Rc::new(Type::from_str(&self.traveler.expect(TokenType::Type)?).unwrap_or(Type::Any));
+        let t = Rc::new(Type::from(&self.traveler.current()).unwrap_or(Type::Any));
         self.traveler.next();
 
         if self.traveler.current_content() == ";" {
@@ -88,7 +88,7 @@ impl Parser {
             let t: Option<Rc<Type>>;
             if self.traveler.current_content() == "[" {
                 t = Some(Rc::new(self.array_type()?));
-            } else if let Some(tt) = Type::from_str(&self.traveler.current_content()) {
+            } else if let Some(tt) = Type::from(&self.traveler.current()) {
                 self.traveler.next();
                 t = Some(Rc::new(tt));
             } else {
@@ -97,7 +97,7 @@ impl Parser {
 
             Ok(Type::Mut(t))
 
-        } else if let Some(t) = Type::from_str(&self.traveler.current_content()) {
+        } else if let Some(t) = Type::from(&self.traveler.current()) {
             self.traveler.next();
             Ok(t)
         } else if self.traveler.current_content() == "[" {

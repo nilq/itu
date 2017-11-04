@@ -6,9 +6,10 @@ use itu::*;
 
 fn main() {
     let test = r#"
-((a: f32, b) -> 10 + a) 10.0
+a := (b): vector ->
+  10 + b
     "#;
-    
+
     let lexer = lexer(&mut test.chars());
 
     let traveler   = Traveler::new(lexer.collect());
@@ -24,7 +25,7 @@ fn main() {
                         for _ in 0 .. pos.line - 1 {
                             lines.next();
                         }
-                        
+
                         let source_pos = format!("ln {}, cl {}| ", pos.line, pos.col).yellow();
 
                         match lines.next() {
